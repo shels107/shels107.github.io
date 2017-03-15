@@ -13,7 +13,7 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<div id="content"></div>
+<div id="mount-point"></div>
 
 <script type="text/babel">
     var Note = React.createClass({
@@ -23,6 +23,11 @@
                     <div className="note" style={style}>
                         <span className="delete-note" onClick={this.props.onDelete}>x</span>
                         {this.props.children}
+                        <select value={this.props.color} onChange={this.props.onStatus} className="note-select">
+                            <option value="#ffffff">new</option>
+                            <option value="#fdff77">underway</option>
+                            <option value="#44c767">done</option>
+                        </select>
                     </div>
             );
         }
@@ -41,7 +46,7 @@
         handleNoteAdd: function () {
             var newNote = {
                 text: this.state.text,
-                color: 'yellow',
+                color: '#fff',
                 id: Date.now()
             };
 
@@ -82,6 +87,7 @@
         },
         render: function () {
             var onNoteDelete = this.props.onNoteDelete;
+            var onNoteStatus = this.props.onNoteStatus;
             return (
                     <div className="notes-grid" ref="grid">
                         {
@@ -89,6 +95,7 @@
                                 return <Note
                                         key={note.id}
                                         onDelete={onNoteDelete.bind(null, note)}
+                                        onStatus={onNoteStatus.bind(null, note)}
                                         color={note.color}>
                                     {note.text}
                                 </Note>;
@@ -122,6 +129,16 @@
             });
             this.setState({notes: newNotes});
         },
+        handleNoteStatus: function (note, event) {
+            var noteId = note.id;
+            var newNotes = this.state.notes.filter(function (note) {
+                if (note.id === noteId) {
+                    note.color = event.target.value;
+                }
+                return note;
+            });
+            this.setState({notes: newNotes});
+        },
         handleNoteAdd: function (newNote) {
             var newNotes = this.state.notes.slice();
             newNotes.unshift(newNote);
@@ -132,7 +149,8 @@
                     <div className="notes-app">
                         <h2 className="app-header">Task app</h2>
                         <NoteEditor onNoteAdd={this.handleNoteAdd}/>
-                        <NotesGrid notes={this.state.notes} onNoteDelete={this.handleNoteDelete}/>
+                        <NotesGrid notes={this.state.notes} onNoteDelete={this.handleNoteDelete}
+                                   onNoteStatus={this.handleNoteStatus}/>
                     </div>
             );
         },
@@ -144,7 +162,7 @@
 
     ReactDOM.render(
             <NotesApp />, //Это Компонент
-        document.getElementById("content")
+        document.getElementById("mount-point")
     );
 </script>
 </body>
